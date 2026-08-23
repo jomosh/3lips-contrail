@@ -12,7 +12,6 @@ import time
 import copy
 import json
 import hashlib
-import os
 import yaml
 from urllib.parse import unquote
 

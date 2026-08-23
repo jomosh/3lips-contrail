@@ -39,7 +39,8 @@ class SaveManager:
   names even when several rotations happen within the same second.
   """
 
-  def __init__(self, save_dir, max_file_bytes=0, max_total_bytes=0):
+  def __init__(self, save_dir: str, max_file_bytes: int = 0,
+               max_total_bytes: int = 0) -> None:
 
     """
     @brief Constructor for SaveManager.
@@ -60,7 +61,7 @@ class SaveManager:
     self._active_file = None
     self._counter = 0
 
-  def _make_active_file(self):
+  def _make_active_file(self) -> None:
 
     """Open a fresh timestamped .ndjson file for appending.
 
@@ -73,7 +74,7 @@ class SaveManager:
     self._active_file = os.path.join(
       self.save_dir, f"{int(time.time())}-{self._counter}.ndjson")
 
-  def append(self, api_object):
+  def append(self, api_object: object) -> None:
 
     """
     @brief Append one JSON line representing api_object to the active
@@ -108,7 +109,7 @@ class SaveManager:
     if self.max_total_bytes > 0:
       self._enforce_total_cap()
 
-  def _list_files(self):
+  def _list_files(self) -> list:
 
     """Return all .ndjson files under save_dir sorted oldest-first
        (by modification time, then name for determinism)."""
@@ -118,7 +119,7 @@ class SaveManager:
     files.sort(key=lambda f: (os.path.getmtime(f), f))
     return files
 
-  def _enforce_total_cap(self):
+  def _enforce_total_cap(self) -> None:
 
     """
     @brief Delete the oldest .ndjson files until the directory total is
