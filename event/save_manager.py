@@ -115,9 +115,13 @@ class SaveManager:
     if self.max_file_bytes > 0 and size >= self.max_file_bytes:
       self._make_active_file()
 
-    with open(self._active_file, 'a') as json_file:
-      json.dump(api_object, json_file)
-      json_file.write('\n')
+    try:
+      with open(self._active_file, 'a') as json_file:
+        json.dump(api_object, json_file)
+        json_file.write('\n')
+    except OSError as e:
+      print(f"SaveManager: failed to write {self._active_file}: {e}")
+      return
 
     if self.max_total_bytes > 0:
       self._enforce_total_cap()

@@ -153,6 +153,18 @@ class TestSaveManager(unittest.TestCase):
       files = glob.glob(os.path.join(save_dir, '*.ndjson'))
       self.assertEqual(len(files), 1)
 
+  def test_append_survives_write_failure(self):
+    with tempfile.TemporaryDirectory() as save_dir:
+      manager = SaveManager(save_dir, 0, 0)
+
+      # First append creates the active file normally.
+      manager.append({"i": 0})
+
+      # Force a subsequent write to fail; append() must swallow the
+      # OSError and return rather than propagating it to the caller.
+      with mock.patch('builtins.open', side_effect=OSError('disk full')):
+        manager.append({"i": 1})
+
   def test_restart_within_same_second_does_not_reuse_existing_file(self):
     with tempfile.TemporaryDirectory() as save_dir:
       frozen_time = time.time()
