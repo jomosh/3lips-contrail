@@ -75,5 +75,6 @@ event:
 
 3lips:
   save: true
-  save_retention_hours: 24   # delete .ndjson files older than this (0 = keep all)
-  tDelete: 60                # seconds of inactivity before removing an API session
+  save_max_bytes: 100000000        # rotate to a new .ndjson file when the current file exceeds this (bytes; 0 = unlimited)
+  save_max_total_bytes: 1000000000 # delete oldest .ndjson files when save/ total exceeds this (bytes; 0 = unlimited)
+  tDelete: 60                      # seconds of inactivity before removing an API session
