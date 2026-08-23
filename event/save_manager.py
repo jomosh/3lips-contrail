@@ -25,7 +25,7 @@ import glob
 import json
 import os
 import time
-from typing import Any
+from typing import Any, List
 
 
 class SaveManager:
@@ -122,7 +122,7 @@ class SaveManager:
     if self.max_total_bytes > 0:
       self._enforce_total_cap()
 
-  def _list_files(self) -> list:
+  def _list_files(self) -> List[str]:
 
     """Return all .ndjson files under save_dir sorted oldest-first
        (by modification time, then name for determinism)."""
