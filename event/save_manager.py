@@ -68,13 +68,20 @@ class SaveManager:
 
     A monotonically increasing counter is appended to the timestamp so
     that multiple rotations within the same second still produce unique
-    file names.
+    file names.  The counter is advanced past any names that already
+    exist in save_dir, so a process restart within the same second does
+    not append into a previous run's file.
 
     The directory is created by append(), which always runs first."""
 
     self._counter += 1
-    self._active_file = os.path.join(
-      self.save_dir, f"{int(time.time())}-{self._counter}.ndjson")
+    while True:
+      candidate = os.path.join(
+        self.save_dir, f"{int(time.time())}-{self._counter}.ndjson")
+      if not os.path.exists(candidate):
+        break
+      self._counter += 1
+    self._active_file = candidate
 
   def append(self, api_object: Any) -> None:
 

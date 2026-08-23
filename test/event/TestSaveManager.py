@@ -4,6 +4,7 @@ import os
 import tempfile
 import time
 import unittest
+from unittest import mock
 
 from save_manager import SaveManager
 
@@ -151,6 +152,29 @@ class TestSaveManager(unittest.TestCase):
 
       files = glob.glob(os.path.join(save_dir, '*.ndjson'))
       self.assertEqual(len(files), 1)
+
+  def test_restart_within_same_second_does_not_reuse_existing_file(self):
+    with tempfile.TemporaryDirectory() as save_dir:
+      frozen_time = time.time()
+      # Simulate a previous run that already created <ts>-1.ndjson.
+      old_name = os.path.join(save_dir, f"{int(frozen_time)}-1.ndjson")
+      with open(old_name, 'w') as f:
+        f.write('previous run\n')
+
+      with mock.patch('save_manager.time.time', return_value=frozen_time):
+        manager = SaveManager(save_dir, 0, 0)
+        manager.append({"run": "new"})
+
+      # The old file must remain untouched; the new run writes to -2.
+      with open(old_name, 'r') as f:
+        self.assertEqual(f.read(), 'previous run\n')
+
+      files = sorted(
+        os.path.basename(p)
+        for p in glob.glob(os.path.join(save_dir, '*.ndjson')))
+      self.assertIn(f"{int(frozen_time)}-1.ndjson", files)
+      self.assertIn(f"{int(frozen_time)}-2.ndjson", files)
+      self.assertEqual(len(files), 2)
 
   def test_negative_limits_clamped_to_zero(self):
     with tempfile.TemporaryDirectory() as save_dir:

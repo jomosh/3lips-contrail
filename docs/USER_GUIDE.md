@@ -296,6 +296,10 @@ docker compose logs -f event   # event loop processing output
 docker compose logs -f api     # API request handling
 ```
 
+Container stdout/stderr is capped at 10 MB per service (`max-size: 10m`,
+`max-file: 1` in `docker-compose.yml`), so the host's Docker log directory
+cannot grow without bound.
+
 ---
 
 ## Web Interface
