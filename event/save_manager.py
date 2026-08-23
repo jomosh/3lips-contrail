@@ -13,11 +13,12 @@ Rotation and pruning are both driven purely by byte sizes:
 
   * max_file_bytes  — when the active file reaches this size, the next
                       append starts a fresh timestamped file.
-  * max_total_bytes — after appending, the oldest .ndjson files are
-                      deleted until the directory total no longer exceeds
-                      this size.
+  * max_total_bytes — when the directory total exceeds this size, the
+                      oldest .ndjson files are deleted until the total
+                      no longer exceeds it.
 
-Either limit may be set to 0 to disable that particular check.
+Either limit may be set to 0 (or any negative value, which is clamped
+to 0) to disable that particular check.
 """
 
 import glob
@@ -32,6 +33,10 @@ class SaveManager:
   @class SaveManager
   @brief Append JSON snapshots to size-rotated .ndjson files under a
          directory, capping total on-disk usage.
+
+  Files are named `<unix_timestamp>-<counter>.ndjson`, where the counter
+  is a monotonically increasing per-instance value that guarantees unique
+  names even when several rotations happen within the same second.
   """
 
   def __init__(self, save_dir, max_file_bytes=0, max_total_bytes=0):
@@ -41,15 +46,17 @@ class SaveManager:
     @param save_dir (str): Directory where .ndjson files are stored.
     @param max_file_bytes (int): Per-file rotation threshold in bytes.
            The current file is retired once it reaches this size.
-           0 disables per-file rotation.
+           0 (or negative) disables per-file rotation.
     @param max_total_bytes (int): Total directory cap in bytes.  The
            oldest .ndjson files are deleted until the directory total
-           is at or below this size.  0 disables the total cap.
+           is at or below this size.  0 (or negative) disables the cap.
     """
 
     self.save_dir = save_dir
-    self.max_file_bytes = max_file_bytes
-    self.max_total_bytes = max_total_bytes
+    # Clamp to >= 0 so the "> 0" checks below treat any non-positive
+    # value uniformly as "unlimited".
+    self.max_file_bytes = max(0, max_file_bytes)
+    self.max_total_bytes = max(0, max_total_bytes)
     self._active_file = None
     self._counter = 0
 
@@ -72,6 +79,10 @@ class SaveManager:
     @brief Append one JSON line representing api_object to the active
            save file, rotating by size and pruning oldest files to
            honour the total-size cap.
+    @details The total-size cap is enforced after writing, so a single
+           record larger than max_total_bytes can transiently exceed the
+           cap until the next append prunes other files; the active file
+           is never deleted, so it remains writable.
     @param api_object (list|dict): The API state to serialise.
     @return None.
     """
@@ -111,8 +122,8 @@ class SaveManager:
 
     """
     @brief Delete the oldest .ndjson files until the directory total is
-           at or below max_total_bytes.  The active file (most recently
-           written) is never deleted.
+           at or below max_total_bytes.  The active file is excluded by
+           path and never deleted.
     @return None.
     """
 
@@ -124,16 +135,20 @@ class SaveManager:
     if total <= self.max_total_bytes:
       return
 
-    # Never delete the most-recently-written file, even if it alone is
-    # larger than the cap — it must stay writable for this epoch.
-    files_deletable = files[:-1]
+    # Exclude the active file by path. Never delete it even if it alone
+    # is larger than the cap — it must stay writable for this epoch.
+    active = os.path.abspath(self._active_file) if self._active_file else None
 
-    for f in files_deletable:
+    for f in files:
       if total <= self.max_total_bytes:
         break
+      if active is not None and os.path.abspath(f) == active:
+        continue
       try:
         size = os.path.getsize(f)
         os.remove(f)
         total -= size
-      except OSError:
-        pass
+        print(f"SaveManager: pruned {os.path.basename(f)} "
+              f"({size} bytes) to enforce save cap")
+      except OSError as e:
+        print(f"SaveManager: failed to prune {f}: {e}")

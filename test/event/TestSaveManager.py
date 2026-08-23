@@ -102,6 +102,46 @@ class TestSaveManager(unittest.TestCase):
       self.assertEqual(len(files), 1)
       self.assertEqual(self._read_all_lines(save_dir)[0], {"i": 0})
 
+  def test_total_cap_excludes_active_file_by_path(self):
+    with tempfile.TemporaryDirectory() as save_dir:
+      manager = SaveManager(save_dir, max_file_bytes=0, max_total_bytes=1)
+
+      # First append creates the active file.
+      manager.append({"active": True})
+      active_file = glob.glob(os.path.join(save_dir, '*.ndjson'))[0]
+
+      # Make a *newer* seed file so the active file is NOT last when
+      # sorted by mtime, then force active's mtime into the (old) past.
+      seeded = os.path.join(save_dir, '9999999.ndjson')
+      with open(seeded, 'w') as f:
+        f.write('z' * 100)
+
+      future = time.time() + 1000
+      os.utime(seeded, (future, future))
+      past = time.time() - 1000
+      os.utime(active_file, (past, past))
+
+      # Append drives total over the cap. The active file must survive
+      # by path identity even though it is no longer the newest.
+      manager.append({"active": True})
+
+      self.assertTrue(os.path.exists(active_file))
+      active_basename = os.path.basename(active_file)
+      remaining = set(os.path.basename(p)
+                      for p in glob.glob(os.path.join(save_dir, '*.ndjson')))
+      self.assertIn(active_basename, remaining)
+
+  def test_negative_limits_clamped_to_zero(self):
+    with tempfile.TemporaryDirectory() as save_dir:
+      manager = SaveManager(save_dir, max_file_bytes=-5, max_total_bytes=-5)
+      self.assertEqual(manager.max_file_bytes, 0)
+      self.assertEqual(manager.max_total_bytes, 0)
+
+      # Negative (clamped to 0) limits behave as unlimited.
+      for i in range(20):
+        manager.append({"i": i})
+      self.assertEqual(len(glob.glob(os.path.join(save_dir, '*.ndjson'))), 1)
+
 
 if __name__ == '__main__':
   unittest.main()
