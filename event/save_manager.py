@@ -25,6 +25,7 @@ import glob
 import json
 import os
 import time
+from typing import Any
 
 
 class SaveManager:
@@ -67,14 +68,15 @@ class SaveManager:
 
     A monotonically increasing counter is appended to the timestamp so
     that multiple rotations within the same second still produce unique
-    file names."""
+    file names.
 
-    os.makedirs(self.save_dir, exist_ok=True)
+    The directory is created by append(), which always runs first."""
+
     self._counter += 1
     self._active_file = os.path.join(
       self.save_dir, f"{int(time.time())}-{self._counter}.ndjson")
 
-  def append(self, api_object: object) -> None:
+  def append(self, api_object: Any) -> None:
 
     """
     @brief Append one JSON line representing api_object to the active
@@ -132,7 +134,10 @@ class SaveManager:
     if not files:
       return
 
-    total = sum(os.path.getsize(f) for f in files)
+    try:
+      total = sum(os.path.getsize(f) for f in files)
+    except OSError:
+      return
     if total <= self.max_total_bytes:
       return
 

@@ -131,6 +131,27 @@ class TestSaveManager(unittest.TestCase):
                       for p in glob.glob(os.path.join(save_dir, '*.ndjson')))
       self.assertIn(active_basename, remaining)
 
+  def test_total_cap_deletes_others_when_active_alone_exceeds_cap(self):
+    with tempfile.TemporaryDirectory() as save_dir:
+      # Active file will exceed the cap on its own; the pre-seeded old
+      # file must still be pruned, with the loop terminating cleanly.
+      manager = SaveManager(save_dir, max_file_bytes=0, max_total_bytes=10)
+
+      old = os.path.join(save_dir, '1000000.ndjson')
+      with open(old, 'w') as f:
+        f.write('x' * 5)
+      old_time = time.time() - 1000
+      os.utime(old, (old_time, old_time))
+
+      # Append writes a record larger than the cap, making the active
+      # file alone exceed max_total_bytes.
+      manager.append({"payload": "y" * 100})
+
+      self.assertFalse(os.path.exists(old))
+
+      files = glob.glob(os.path.join(save_dir, '*.ndjson'))
+      self.assertEqual(len(files), 1)
+
   def test_negative_limits_clamped_to_zero(self):
     with tempfile.TemporaryDirectory() as save_dir:
       manager = SaveManager(save_dir, max_file_bytes=-5, max_total_bytes=-5)

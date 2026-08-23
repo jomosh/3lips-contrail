@@ -44,6 +44,9 @@ try:
   tDelete = config['3lips']['tDelete']
   saveMaxBytes = config.get('3lips', {}).get('save_max_bytes', 100000000)
   saveMaxTotalBytes = config.get('3lips', {}).get('save_max_total_bytes', 1000000000)
+  if 'save_retention_hours' in config.get('3lips', {}):
+    print("DEPRECATION: 3lips.save_retention_hours is no longer used. "
+          "Use 3lips.save_max_bytes and 3lips.save_max_total_bytes instead.")
   tar1090Https = config['map']['tar1090_https']
   tar1090Server = config['map']['tar1090']
   eventInterval = config.get('event', {}).get('interval', 1.0)

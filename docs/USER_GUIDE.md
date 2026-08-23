@@ -688,6 +688,9 @@ python3 -m unittest discover -s ../test/event/ -p "Test*.py" -v
 
 When `3lips.save: true`, each run writes to a `.ndjson` file in `save/` named by
 Unix timestamp. Each line is a JSON snapshot of the full API state at one epoch.
+Files are named `<unix_timestamp>-<counter>.ndjson`, where the counter is a
+monotonically increasing value that keeps names unique when several rotations
+occur within the same second.
 
 The `save/` directory can grow large over time — a typical deployment produces
 ~5–10 KB per epoch (hundreds of MB per day). Two size limits bound disk usage:
