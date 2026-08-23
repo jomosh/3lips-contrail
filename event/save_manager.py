@@ -97,7 +97,11 @@ class SaveManager:
     @return None.
     """
 
-    os.makedirs(self.save_dir, exist_ok=True)
+    try:
+      os.makedirs(self.save_dir, exist_ok=True)
+    except OSError as e:
+      print(f"SaveManager: cannot create save directory {self.save_dir}: {e}")
+      return
 
     if self._active_file is None:
       self._make_active_file()
