@@ -4,10 +4,10 @@
 @author jomosh
 
 Rotates the active .ndjson save file by size and enforces a total
-directory size cap by deleting the oldest files.  This replaces the
-previous age (retention-hours) based cleanup, which could not bound the
-size of the active file and therefore allowed the save directory to grow
-until it filled the disk.
+directory size cap by deleting the oldest files.  Together these bounds
+keep the active file under max_file_bytes and the directory under
+max_total_bytes, so the save directory cannot grow until it fills the
+disk.
 
 Rotation and pruning are both driven purely by byte sizes:
 
@@ -147,7 +147,8 @@ class SaveManager:
 
     try:
       total = sum(os.path.getsize(f) for f in files)
-    except OSError:
+    except OSError as e:
+      print(f"SaveManager: cannot compute save directory size: {e}")
       return
     if total <= self.max_total_bytes:
       return
