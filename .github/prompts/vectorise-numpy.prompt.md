@@ -1,11 +1,11 @@
 ---
-description: "Vectorise a slow Python function in 3lips using NumPy: replace for-loops with broadcasting, add KD-tree nearest-neighbour search, and benchmark the result."
+description: "Vectorise a slow Python function in 3lips-contrail using NumPy: replace for-loops with broadcasting, add KD-tree nearest-neighbour search, and benchmark the result."
 name: "Vectorise Python with NumPy"
 argument-hint: "Function name and file path to vectorise (e.g. 'EllipseParametric.process in event/algorithm/localisation/EllipseParametric.py')"
 agent: "agent"
 tools: [read, edit, execute, todo]
 ---
-Vectorise a performance-critical Python function in 3lips using NumPy.
+Vectorise a performance-critical Python function in 3lips-contrail using NumPy.
 
 ## Workflow
 

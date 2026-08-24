@@ -1,11 +1,11 @@
 ---
-description: "Debug a localisation accuracy problem in 3lips: wrong positions on map, large error vs ADS-B truth, or unexpected empty output. Systematic diagnosis workflow."
+description: "Debug a localisation accuracy problem in 3lips-contrail: wrong positions on map, large error vs ADS-B truth, or unexpected empty output. Systematic diagnosis workflow."
 name: "Debug Localisation Accuracy"
 argument-hint: "Describe the symptom (e.g. 'all positions show near 0°E longitude', 'ellipse-parametric-min returns nothing', 'positions 50km off truth')"
 agent: "agent"
 tools: [read, search, execute, todo]
 ---
-Systematically debug a localisation accuracy or correctness problem in 3lips.
+Systematically debug a localisation accuracy or correctness problem in 3lips-contrail.
 
 ## Diagnostic Checklist
 

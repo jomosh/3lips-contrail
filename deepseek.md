@@ -1,4 +1,4 @@
-# 3lips — DeepSeek Portable Instructions
+# 3lips-contrail — DeepSeek Portable Instructions
 
 > **Portable copy for use outside Cline (e.g., DeepSeek web chat, API, other IDEs).**
 > **This file is auto-generated from `.clinerules` (single source of truth).**

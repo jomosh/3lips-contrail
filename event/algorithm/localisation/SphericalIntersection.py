@@ -30,7 +30,7 @@ class SphericalIntersection:
 
     """
     @brief Perform target localisation using the SX method.
-    @param assoc_detections (dict): JSON of blah2 radar detections.
+    @param assoc_detections (dict): JSON of blah2-contrail radar detections.
     @param radar_data (dict): Radar config and detection data keyed by radar name.
     @return dict: Dict of associated detections.
     """

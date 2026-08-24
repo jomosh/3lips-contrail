@@ -1,13 +1,13 @@
-# 3lips contrail
+# 3lips-contrail
 
 Target localisation for multi-static radar using ellipse intersections. Not a dating app.
 
 
-![3lips example display](./example.png "3lips")
+![3lips-contrail example display](./example.png "3lips-contrail")
 
 ## Features
 
-- Provides a JSON API for geolocation of targets given [blah2](http://github.com/jomosh/blah2) radar nodes.
+- Provides a JSON API for geolocation of targets given [blah2-contrail](http://github.com/jomosh/blah2-contrail) radar nodes.
 - Uses a [MapLibre GL JS](https://github.com/maplibre/maplibre-gl-js) web front-end to visualise data.
 - Ability to compare a number of algorithms for target localisation.
 
@@ -19,7 +19,7 @@ Target localisation for multi-static radar using ellipse intersections. Not a da
 - Run the docker compose command.
 
 ```bash
-sudo git clone http://github.com/jomosh/3lips /opt/3lips
+sudo git clone http://github.com/jomosh/3lips-contrail /opt/3lips-contrail
 sudo docker compose up -d —build
 ```
 

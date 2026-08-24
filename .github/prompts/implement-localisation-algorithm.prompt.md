@@ -1,11 +1,11 @@
 ---
-description: "Implement a new localisation algorithm for 3lips: creates the class file, wires it into api.py and event.py, and scaffolds the unit test."
+description: "Implement a new localisation algorithm for 3lips-contrail: creates the class file, wires it into api.py and event.py, and scaffolds the unit test."
 name: "Implement Localisation Algorithm"
 argument-hint: "Algorithm name and brief description (e.g. 'TDOA Least-Squares using scipy LM optimiser')"
 agent: "agent"
 tools: [read, edit, search, todo]
 ---
-Implement a new localisation algorithm for 3lips following the project conventions.
+Implement a new localisation algorithm for 3lips-contrail following the project conventions.
 
 ## Steps
 

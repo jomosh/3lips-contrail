@@ -1,11 +1,11 @@
 ---
-description: "Audit the 3lips event loop for performance bottlenecks: profile execution, identify slow operations, and produce a prioritised list of optimisation recommendations."
+description: "Audit the 3lips-contrail event loop for performance bottlenecks: profile execution, identify slow operations, and produce a prioritised list of optimisation recommendations."
 name: "Performance Audit"
 argument-hint: "Optional: specific component to audit (e.g. 'EllipsoidParametric', 'HTTP fetch', 'full event loop')"
 agent: "agent"
 tools: [read, search, execute]
 ---
-Perform a performance audit of the 3lips event loop.
+Perform a performance audit of the 3lips-contrail event loop.
 
 ## Audit Scope
 Read and analyse the following files:

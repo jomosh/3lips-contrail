@@ -120,7 +120,7 @@ function event_radar() {
         }
       }
 
-      // ---- Non-cooperative (blah2-only) targets --------------------------
+      // ---- Non-cooperative (blah2-contrail-only) targets --------------------------
       if (data["detections_noncooperative"]) {
         removeEntitiesOlderThanAndFade("noncooperative", 10, 0.5);
 

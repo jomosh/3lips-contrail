@@ -1,6 +1,6 @@
 """
 @file event.py
-@brief Event loop for 3lips.
+@brief Event loop for 3lips-contrail.
 @author 30hours
 """
 
@@ -212,7 +212,7 @@ async def event():
   timestamp = int(time.time()*1000)
   api_event = copy.copy(api)
 
-  # list all blah2 radars
+  # list all blah2-contrail radars
   radar_names = []
   for item in api_event:
     for radar in item["server"]:

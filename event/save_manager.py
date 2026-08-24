@@ -1,6 +1,6 @@
 """
 @file save_manager.py
-@brief Size-limited NDJSON save file management for 3lips.
+@brief Size-limited NDJSON save file management for 3lips-contrail.
 @author jomosh
 
 Rotates the active .ndjson save file by size and enforces a total

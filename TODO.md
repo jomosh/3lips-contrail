@@ -1,4 +1,4 @@
-# 3lips — Project TODO
+# 3lips-contrail — Project TODO
 
 > Generated: 2026-05-29 from full codebase analysis.  
 > Organised into phases by priority: correctness → speed → accuracy → robustness → long-term.
@@ -152,7 +152,7 @@ These are confirmed defects that silently produce wrong results today.
 
 ### C5 — Weighted measurements (SNR-proportional)
 - **Problem**: All radar measurements are treated equally. A radar with a high-SNR detection has lower range uncertainty than a marginal detection near the noise floor.
-- [ ] Expose SNR or detection confidence from blah2 API
+- [ ] Expose SNR or detection confidence from blah2-contrail API
 - [ ] Weight residuals in TDOA Least-Squares by `1/sigma_i`
 - [ ] Weight innovation covariance in EKF by measurement quality
 
@@ -233,7 +233,7 @@ These are confirmed defects that silently produce wrong results today.
 - **Topology B** (same RX, different TX) risk: The `EllipseParametric`/`EllipsoidParametric` algorithms are geometry-agnostic and *should* work, but the ellipsoid orientation and midpoint calculation in `Ellipsoid.py` has only been exercised with the TX-to-RX baseline pointing in the shared-TX direction. Need to confirm yaw/pitch computation is correct when the shared node is RX.
 - **Topology C** (different TX, different RX) risk: Same as above. Additionally, `SphericalIntersection` must not be offered as an option in the UI when Topology C is detected (see D8).
 - **Topology D** (same TX, same RX, different fc) risk: The algorithm will appear to run and return points, but those points are meaningless (see USER_GUIDE.md). The UI should ideally warn the user.
-- [ ] Write a synthetic unit test for Topology B: 3 blah2 configs with same RX, 3 different TX positions → verify EllipseParametric returns correct position
+- [ ] Write a synthetic unit test for Topology B: 3 blah2-contrail configs with same RX, 3 different TX positions → verify EllipseParametric returns correct position
 - [ ] Write a synthetic unit test for Topology C: 3 fully independent TX-RX pairs → verify EllipseParametric returns correct position
 - [ ] Write a synthetic test for Topology D: 2 pairs with identical TX/RX coords → verify output is empty or carries a warning (should produce no intersection)
 - [ ] Confirm `Ellipsoid.py` yaw/pitch computation is correct for all baseline orientations (add assertion-based test)
@@ -247,7 +247,7 @@ These are confirmed defects that silently produce wrong results today.
 
 ### D7 — Non-ADS-B association algorithm (see Phase F for full plan)
 - **File**: `event/algorithm/associator/`
-- **Problem**: Prior to the GeometricAssociator becoming the primary associator, association required external ADS-B truth via adsb2dd. Targets not broadcasting ADS-B (military aircraft, general aviation without transponder, drones) were completely invisible to the system.
+- **Problem**: Prior to the GeometricAssociator becoming the primary associator, association required external ADS-B truth via adsb2dd-contrail. Targets not broadcasting ADS-B (military aircraft, general aviation without transponder, drones) were completely invisible to the system.
 - **Key finding**: The ADS-B dependency is **entirely in the association layer**. Every localisation algorithm (`EllipseParametric`, `EllipsoidParametric`, `SphericalIntersection`) consumes `{id: [{radar, delay, doppler}]}` and is agnostic to how that dict was populated. A blind associator producing the same schema requires **zero changes** to any localisation code.
 - **Note**: Mentioned in README Future Work. See Phase F below for the full research-backed implementation plan.
 - [x] Implement Phase F1 `GeometricAssociator` (see Phase F)
@@ -261,7 +261,7 @@ These are confirmed defects that silently produce wrong results today.
 ### E1 — Detection vs Track data selection per radar
 - **Note**: Mentioned in README Future Work.
 - [ ] Add `data_mode: detection | track` per radar in config.yml
-- [ ] Support consuming track-level (fused) data from blah2 instead of raw detections
+- [ ] Support consuming track-level (fused) data from blah2-contrail instead of raw detections
 
 ### E2 — Long-term metrics and visualisation
 - **Note**: Mentioned in README Future Work.
@@ -306,7 +306,7 @@ These are confirmed defects that silently produce wrong results today.
 
 ### E10 — Documentation
 - [ ] Add per-algorithm accuracy/performance comparison table to README
-- [ ] Document blah2 integration requirements (config fields needed from radar)
+- [ ] Document blah2-contrail integration requirements (config fields needed from radar)
 - [ ] Add architecture diagram (sequence diagram: API → event → radar → localisation)
 - [ ] Publish API reference (OpenAPI/Swagger spec)
 
@@ -435,7 +435,7 @@ Both fields co-exist. `detections_localised` continues to hold ADS-B-associated 
 
 ### Background — Why ADS-B Was Historically Required (Resolved ✅)
 
-The original `AdsbAssociator` used an external adsb2dd service to compute the expected bistatic `(delay, Doppler)` for every ADS-B aircraft, then matched those predictions against each radar's detection list. As of this writing, **ADS-B association has been removed** and `GeometricAssociator` is the sole associator — it solves the data association problem purely from radar geometry. The CRLB floor is set by radar bandwidth and SNR, not by the association method.
+The original `AdsbAssociator` used an external adsb2dd-contrail service to compute the expected bistatic `(delay, Doppler)` for every ADS-B aircraft, then matched those predictions against each radar's detection list. As of this writing, **ADS-B association has been removed** and `GeometricAssociator` is the sole associator — it solves the data association problem purely from radar geometry. The CRLB floor is set by radar bandwidth and SNR, not by the association method.
 
 ### Key Architectural Invariant
 
@@ -509,7 +509,7 @@ ADS-B vs blind approaches differ **only in false-association rate**, not in true
 ### F1 — `GeometricAssociator`: Enumeration + Doppler Filter
 - **Files to create**: `event/algorithm/associator/GeometricAssociator.py`
 - **Files to modify**: `event/event.py` (one `elif` branch), `api/api.py` (one list entry), `config/config.yml` (new `associate.geometric` block)
-- **Removes**: hard dependency on `adsb2dd` service for basic operation
+- **Removes**: hard dependency on `adsb2dd-contrail` service for basic operation
 
 **Algorithm (step by step):**
 
@@ -670,13 +670,13 @@ The joint measurement covariance is block-diagonal over radars (independent nois
 ---
 
 ### F4 — PHD Particle Filter (Long-Term / Research)
-- **Prerequisite**: F3 complete; upstream change to blah2 to expose raw range-Doppler maps
+- **Prerequisite**: F3 complete; upstream change to blah2-contrail to expose raw range-Doppler maps
 - **Purpose**: Approaches CRLB-optimal performance for non-cooperative targets in high-clutter environments; eliminates explicit detection thresholding (Track-Before-Detect)
 
 - **Key paper**: Vo & Ma, "The Gaussian Mixture PHD Filter," *IEEE Trans. Signal Process.* 54(11), 2006
 - **PCL application**: Tharmarasa et al., "Multitarget passive coherent location with transmitted signal uncertainty," *IEEE Trans. Signal Process.* 58(9), 2010
 
-- [ ] Define upstream requirement: blah2 API must expose range-Doppler map as 2D float array via `/api/rdmap` endpoint
+- [ ] Define upstream requirement: blah2-contrail API must expose range-Doppler map as 2D float array via `/api/rdmap` endpoint
 - [ ] Implement Gaussian Mixture PHD filter adapted for bistatic range-Doppler observations
 - [ ] Define birth intensity model for new targets (uniform over expected surveillance volume in ECEF)
 - [ ] Implement resampling and pruning for particle variant
