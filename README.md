@@ -20,6 +20,7 @@ Target localisation for multi-static radar using ellipse intersections. Not a da
 
 ```bash
 sudo git clone http://github.com/jomosh/3lips-contrail /opt/3lips-contrail
+cd /opt/3lips-contrail
 sudo docker compose up -d —build
 ```
 
