@@ -1,11 +1,11 @@
 ---
-description: "Add a unit test for a 3lips algorithm or geometry function using a synthetic known-answer scenario. Use when a new algorithm is added, a bug is fixed, or test coverage needs improving."
+description: "Add a unit test for a 3lips-contrail algorithm or geometry function using a synthetic known-answer scenario. Use when a new algorithm is added, a bug is fixed, or test coverage needs improving."
 name: "Add Algorithm Unit Test"
 argument-hint: "Algorithm or function to test and what scenario (e.g. 'EllipseParametric mean intersection with 3 radars in UK geometry')"
 agent: "agent"
 tools: [read, edit, search]
 ---
-Add a unit test for a 3lips algorithm using a synthetic geometry with a known ground-truth answer.
+Add a unit test for a 3lips-contrail algorithm using a synthetic geometry with a known ground-truth answer.
 
 ## Synthetic Test Pattern
 

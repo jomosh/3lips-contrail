@@ -484,7 +484,7 @@ map.on('load', function () {
     },
   });
 
-  // add radar site points (rx and tx) from each blah2 server
+  // add radar site points (rx and tx) from each blah2-contrail server
   // Only when show_radar_sites is true in config (default); skip entirely when
   // radar positions should not be publicly visible.
   if (config && config.map && config.map.show_radar_sites !== false) {

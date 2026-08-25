@@ -18,6 +18,11 @@ services:
     volumes:
       - ./config:/app/config
       - ./common:/app/common
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "1"
     container_name: 3lips-api
 
   event:
@@ -33,4 +38,9 @@ services:
       - ./common:/app/common
       - ./test:/app/test
       - ./save:/app/save
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "1"
     container_name: 3lips-event

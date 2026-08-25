@@ -18,6 +18,6 @@ To avoid having to install extra libraries on the host machine (e.g. numpy, matp
 
 ```bash
 sudo docker build -t 3lips-script .
-sudo docker run -it -v /opt/3lips/save:/app/save -v /opt/3lips/script:/app/script -v /opt/3lips/event/algorithm/geometry:/app/geometry 3lips-script bash
+sudo docker run -it -v /opt/3lips-contrail/save:/app/save -v /opt/3lips-contrail/script:/app/script -v /opt/3lips-contrail/event/algorithm/geometry:/app/geometry 3lips-script bash
 PYTHONPATH=/app python <script> <args>
 ```

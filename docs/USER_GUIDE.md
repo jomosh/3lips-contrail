@@ -1,4 +1,4 @@
-# 3lips User Guide
+# 3lips-contrail User Guide
 
 ## Table of Contents
 
@@ -20,13 +20,13 @@
 
 ## Overview
 
-3lips processes bistatic delay/Doppler detections from one or more [blah2](https://github.com/jomosh/blah2) passive coherent location (PCL) radar nodes and produces geolocated target positions. The name refers to the fact that at least three bistatic ellipsoids (from three radar pairs) are needed for a good 3D position fix.
+3lips-contrail processes bistatic delay/Doppler detections from one or more [blah2-contrail](https://github.com/jomosh/blah2-contrail) passive coherent location (PCL) radar nodes and produces geolocated target positions. The name refers to the fact that at least three bistatic ellipsoids (from three radar pairs) are needed for a good 3D position fix.
 
 ### How It Works
 
-Each **blah2** radar node outputs a list of detections as `(delay, Doppler)` pairs — i.e. the total path-length excess and the relative velocity of each detected target. 3lips:
+Each **blah2-contrail** radar node outputs a list of detections as `(delay, Doppler)` pairs — i.e. the total path-length excess and the relative velocity of each detected target. 3lips:
 
-1. **Fetches** detection and config data from each blah2 node every second.
+1. **Fetches** detection and config data from each blah2-contrail node every second.
 2. **Associates** detections across radars using geometric enumeration (no external ADS‑B association service required).
 3. **Localises** each target using one of several ellipsoid-intersection algorithms.
 4. **Serves** the results as JSON via a REST API and renders them on a MapLibre GL JS web map.
@@ -39,13 +39,13 @@ Each **blah2** radar node outputs a list of detections as `(delay, Doppler)` pai
 - Linux (tested), macOS, or Windows with WSL2
 - [Docker Engine](https://docs.docker.com/engine/install/) ≥ 20.10
 - [Docker Compose](https://docs.docker.com/compose/install/) ≥ 2.0 (`docker compose` with a space, not `docker-compose`)
-- Network access to your blah2 radar nodes and ADS-B truth server
-- At least **3 blah2 radar nodes** (the event loop requires ≥ 3 associated detections before any localisation algorithm runs)
+- Network access to your blah2-contrail radar nodes and ADS-B truth server
+- At least **3 blah2-contrail radar nodes** (the event loop requires ≥ 3 associated detections before any localisation algorithm runs)
 
 ### External Services Required
 | Service | Purpose | URL format |
 |---------|---------|-----------|
-| [blah2](https://github.com/jomosh/blah2) | Bistatic radar node(s) | `hostname:port` |
+| [blah2-contrail](https://github.com/jomosh/blah2-contrail) | Bistatic radar node(s) | `hostname:port` |
 | [tar1090](https://github.com/wiedehopf/tar1090) | ADS-B aircraft truth display | `hostname:port` |
 
 ---
@@ -54,8 +54,8 @@ Each **blah2** radar node outputs a list of detections as `(delay, Doppler)` pai
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/jomosh/3lips /opt/3lips
-cd /opt/3lips
+git clone https://github.com/jomosh/3lips-contrail /opt/3lips-contrail
+cd /opt/3lips-contrail
 
 # 2. Edit configuration (see Configuration Reference below)
 nano config/config.yml
@@ -91,7 +91,7 @@ All configuration lives in `config/config.yml`. This file is mounted read-only i
 # ─── Radar Nodes ────────────────────────────────────────────────────────────
 radar:
   - name: radar1               # Display name shown in the web UI dropdown
-    url: "radar1.example.com"  # Hostname (+ optional :port) of the blah2 node
+    url: "radar1.example.com"  # Hostname (+ optional :port) of the blah2-contrail node
   - name: radar2               # Add as many radar entries as you have nodes
     url: "192.168.1.50:3000"   # IP addresses work too
 
@@ -213,15 +213,18 @@ map:
 # ─── System ──────────────────────────────────────────────────────────────────
 3lips:
   save: true                  # Write all API state to a .ndjson file in save/
-                              # for offline replay and accuracy analysis.
-  save_retention_hours: 24    # Auto-delete .ndjson files older than this many
-                              # hours.  Set to 0 to keep all files indefinitely.
-                              # Each restart creates a new file; over days the
-                              # save/ directory can fill the disk.
+                               # for offline replay and accuracy analysis.
+  save_max_bytes: 100000000   # Rotate to a new .ndjson file when the current
+                               # file exceeds this many bytes (0 = unlimited).
+  save_max_total_bytes: 1000000000
+                               # Delete the oldest .ndjson files when the save/
+                               # directory total exceeds this many bytes. Keeps
+                               # the save/ directory from filling the disk
+                               # (0 = unlimited).
   tDelete: 60                 # Seconds of inactivity before removing an API
-                              # request from the processing queue.  A browser
-                              # tab that is closed or stops polling will be
-                              # cleaned up after this time.
+                               # request from the processing queue.  A browser
+                               # tab that is closed or stops polling will be
+                               # cleaned up after this time.
 ```
 
 ---
@@ -231,7 +234,7 @@ map:
 | Parameter | Type | Units | Effect |
 |-----------|------|-------|--------|
 | `radar[].name` | string | — | Display label in UI |
-| `radar[].url` | string | — | blah2 API hostname[:port] |
+| `radar[].url` | string | — | blah2-contrail API hostname[:port] |
 | `associate.adsb.tDelete` | int | seconds | ADS-B track expiry |
 | `localisation.ellipse.nSamples` | int | — | Ellipse sample density |
 | `localisation.ellipse.threshold` | int | metres | Intersection test distance |
@@ -245,7 +248,8 @@ map:
 | `map.center_height` | int | metres | Initial map N-S extent |
 | `map.tar1090` | string | — | tar1090 ADS-B overlay server |
 | `3lips.save` | bool | — | Enable NDJSON save file |
-| `3lips.save_retention_hours` | int | hours | Auto-delete .ndjson files older than this (0 = keep all) |
+| `3lips.save_max_bytes` | int | bytes | Rotate to a new .ndjson file when the current one exceeds this (0 = unlimited) |
+| `3lips.save_max_total_bytes` | int | bytes | Delete oldest .ndjson files when save/ total exceeds this (0 = unlimited) |
 | `3lips.tDelete` | int | seconds | Idle API session expiry |
 | `associate.geometric.threshold` | int | metres | Blind association intersection distance |
 | `associate.geometric.nSamples` | int | — | Ellipse samples per detection for blind association |
@@ -269,7 +273,7 @@ map:
 
 ### Starting
 ```bash
-cd /opt/3lips
+cd /opt/3lips-contrail
 docker compose up -d --build   # build images and start in background
 docker compose ps              # check all containers are "Up"
 ```
@@ -292,6 +296,10 @@ docker compose logs -f event   # event loop processing output
 docker compose logs -f api     # API request handling
 ```
 
+Container stdout/stderr is capped at 10 MB per service (`max-size: 10m`,
+`max-file: 1` in `docker-compose.yml`), so the host's Docker log directory
+cannot grow without bound.
+
 ---
 
 ## Web Interface
@@ -301,7 +309,7 @@ Open **http://localhost:49156** in a browser.
 ### Main Controls
 | Control | Description |
 |---------|-------------|
-| **Radar servers** | Select which blah2 radar nodes to include (multi-select) |
+| **Radar servers** | Select which blah2-contrail radar nodes to include (multi-select) |
 | **Localisation** | Which algorithm to use for position fixing (see below) |
 | **ADS-B** | Select the ADS-B truth server for association and map overlay |
 | **Submit** | Start (or update) the processing request |
@@ -354,7 +362,7 @@ Trigger or poll a localisation request.
 
 | Parameter | Required | Example | Description |
 |-----------|----------|---------|-------------|
-| `server` | yes (repeat) | `server=radar1.example.com` | blah2 radar node URL. Repeat for each radar. |
+| `server` | yes (repeat) | `server=radar1.example.com` | blah2-contrail radar node URL. Repeat for each radar. |
 | `localisation` | yes | `localisation=ellipse-parametric-mean` | Localisation algorithm ID |
 | `adsb` | yes | `adsb=adsb.example.com` | tar1090 server hostname |
 
@@ -439,7 +447,7 @@ Returns the current `config.yml` as JSON. Useful for frontend initialisation.
 
 ## Deployment Topologies
 
-3lips is a **multi-bistatic** passive radar system. Each blah2 node represents one **bistatic pair** — one transmitter (TX) and one receiver (RX). The physical arrangement of those TX and RX sites determines what position information you can extract and which algorithms apply.
+3lips-contrail is a **multi-bistatic** passive radar system. Each blah2-contrail node represents one **bistatic pair** — one transmitter (TX) and one receiver (RX). The physical arrangement of those TX and RX sites determines what position information you can extract and which algorithms apply.
 
 The four principal configurations are described below.
 
@@ -454,7 +462,7 @@ The four principal configurations are described below.
 ```
 
 - **Description**: One transmitter of opportunity (FM, DAB, DVB-T broadcast); multiple independent passive receivers.
-- **Each blah2 node**: Same `tx` latitude/longitude/altitude, different `rx` coordinates.
+- **Each blah2-contrail node**: Same `tx` latitude/longitude/altitude, different `rx` coordinates.
 - **Geometry**: All ellipsoids share the FM tower as one focus. Baselines fan outward from the TX toward each RX. Angular diversity depends on how widely the receivers are spread around the transmitter.
 - **Algorithms**: All three algorithms support this. `SphericalIntersection` is specifically designed for it.
 - **Minimum for a reliable 3D fix**: 3 bistatic pairs (3 RX nodes).
@@ -471,13 +479,13 @@ The four principal configurations are described below.
 ```
 
 - **Description**: A single receive site processes signals from multiple transmitters of opportunity simultaneously.
-- **Each blah2 node**: Same `rx` coordinates, different `tx` coordinates.
+- **Each blah2-contrail node**: Same `rx` coordinates, different `tx` coordinates.
 - **Geometry**: All ellipsoids share the RX site as one focus. Baselines fan outward from the RX toward each TX. Good geometric diversity if transmitters are angularly spread as seen from the receiver.
 - **Algorithms**:
   - `EllipseParametric` / `EllipsoidParametric`: ✅ Fully supported — each radar constructs its own ellipsoid from its individual TX/RX config.
   - `SphericalIntersection`: ⚠️ **Currently broken** — the code hardcodes `type="rx"` (TX as the shared node), which is the inverse of what this topology requires. Fix is tracked as TODO item **C6**. After the fix, configure `shared_node: rx` in `config.yml`.
 - **Minimum for a reliable 3D fix**: 3 bistatic pairs (3 TX sources).
-- **Practical advantage**: Only one receive antenna mast and one wideband ADC/blah2 receiver are required. Multiple blah2 processes run on the same hardware, each tuned to a different carrier frequency and configured with the corresponding transmitter coordinates. This is arguably the most hardware-efficient passive radar architecture.
+- **Practical advantage**: Only one receive antenna mast and one wideband ADC/blah2-contrail receiver are required. Multiple blah2-contrail processes run on the same hardware, each tuned to a different carrier frequency and configured with the corresponding transmitter coordinates. This is arguably the most hardware-efficient passive radar architecture.
 
 ---
 
@@ -490,14 +498,14 @@ The four principal configurations are described below.
      |________________|
 ```
 
-- **Description**: Each blah2 node is a fully independent bistatic pair — no TX or RX site is shared between any two nodes.
-- **Each blah2 node**: Different `tx` and different `rx` coordinates.
+- **Description**: Each blah2-contrail node is a fully independent bistatic pair — no TX or RX site is shared between any two nodes.
+- **Each blah2-contrail node**: Different `tx` and different `rx` coordinates.
 - **Geometry**: Maximum geometric diversity. Ellipsoid baselines point in all directions. GDOP (Geometric Dilution of Precision) is typically the best achievable for a given number of sites.
 - **Algorithms**:
   - `EllipseParametric` / `EllipsoidParametric`: ✅ Fully supported — algorithm is geometry-agnostic; it builds one ellipsoid per bistatic pair from that pair's TX/RX positions.
   - `SphericalIntersection`: ❌ **Not applicable** — the SX closed-form solution requires a shared common node (shared TX or shared RX). It cannot be applied to arbitrary multistatic geometries. Use `EllipseParametric` or, when available, the planned TDOA Least-Squares algorithm (TODO item **C1**), which handles all topologies.
 - **Minimum for a reliable 3D fix**: 3 independent bistatic pairs.
-- **Overdetermined variant — 2 TX × 2 RX**: Two transmit sites (A, B) and two receive sites (1, 2) can be configured as four blah2 nodes covering all pairings: TX-A/RX-1, TX-A/RX-2, TX-B/RX-1, TX-B/RX-2. This gives 4 bistatic pairs (highly overdetermined for 3D) from only 4 physical antenna locations. Parametric algorithms support this without modification.
+- **Overdetermined variant — 2 TX × 2 RX**: Two transmit sites (A, B) and two receive sites (1, 2) can be configured as four blah2-contrail nodes covering all pairings: TX-A/RX-1, TX-A/RX-2, TX-B/RX-1, TX-B/RX-2. This gives 4 bistatic pairs (highly overdetermined for 3D) from only 4 physical antenna locations. Parametric algorithms support this without modification.
 
 ---
 
@@ -509,7 +517,7 @@ The four principal configurations are described below.
 ```
 
 - **Description**: The same physical TX and RX sites are used, but different carrier frequencies are processed (e.g. two FM stations in view of the same receiver).
-- **Each blah2 node**: **Identical** `tx` and `rx` coordinates; different `fc`.
+- **Each blah2-contrail node**: **Identical** `tx` and `rx` coordinates; different `fc`.
 - **Geometry**: A bistatic ellipsoid is defined entirely by the TX and RX positions and the measured bistatic range. Since path lengths are **frequency-independent** in air, the same target produces the same bistatic range at all frequencies → **identical ellipsoids**. Multiple frequencies add zero additional geometric constraint for localisation.
   - Formally: all ellipsoids are confocal (same two foci) and co-sized (same semi-major axis for any given target). Intersecting identical surfaces gives the entire surface, not a point.
 - **Cannot localise on its own**. If you want frequency diversity, pair it with at least one additional independent bistatic pair from a different TX or RX site (Topology A, B, or C).
@@ -543,7 +551,7 @@ All algorithms need at least **3 independent bistatic pairs with distinct baseli
 
 ## Connecting Radar Nodes
 
-Each blah2 node must be network-accessible from the 3lips host. The 3lips event loop polls two endpoints per node:
+Each blah2-contrail node must be network-accessible from the 3lips-contrail host. The 3lips-contrail event loop polls two endpoints per node:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -568,7 +576,7 @@ The `/api/config` response must include:
 }
 ```
 
-If a radar node is unreachable (timeout or error), 3lips continues with the remaining available nodes. Localisation requires at least **3 nodes responding** for all methods. `SphericalIntersection` silently skips targets with fewer than 3 associated detections; accuracy may degrade for near-collinear geometries — see TODO item D1 for the remaining conditioning work.
+If a radar node is unreachable (timeout or error), 3lips-contrail continues with the remaining available nodes. Localisation requires at least **3 nodes responding** for all methods. `SphericalIntersection` silently skips targets with fewer than 3 associated detections; accuracy may degrade for near-collinear geometries — see TODO item D1 for the remaining conditioning work.
 
 ---
 
@@ -654,7 +662,7 @@ python3 -m unittest discover -s ../test/event/ -p "Test*.py" -v
 ### Project structure
 
 ```
-3lips/
+3lips-contrail/
 ├── api/                    # Flask API server + web frontend
 │   ├── api.py              # Main API routes and validation
 │   ├── map/                # MapLibre GL JS frontend
@@ -682,12 +690,21 @@ python3 -m unittest discover -s ../test/event/ -p "Test*.py" -v
 
 ### Saved session files
 
-When `3lips.save: true`, each run creates a `.ndjson` file in `save/` named by
+When `3lips.save: true`, each run writes to a `.ndjson` file in `save/` named by
 Unix timestamp. Each line is a JSON snapshot of the full API state at one epoch.
+Files are named `<unix_timestamp>-<counter>.ndjson`, where the counter is a
+monotonically increasing value that keeps names unique when several rotations
+occur within the same second.
 
 The `save/` directory can grow large over time — a typical deployment produces
-~5–10 KB per epoch (hundreds of MB per day).  Set `3lips.save_retention_hours`
-to automatically delete files older than the configured age.  Set
+~5–10 KB per epoch (hundreds of MB per day). Two size limits bound disk usage:
+
+- `3lips.save_max_bytes` rotates to a fresh `.ndjson` file once the current file
+  exceeds this size.
+- `3lips.save_max_total_bytes` deletes the oldest `.ndjson` files whenever the
+  directory total exceeds this size.
+
+Set either value to `0` to disable that particular limit, or set
 `3lips.save: false` to disable saving entirely.
 
 #### Analysis scripts (`script/`)

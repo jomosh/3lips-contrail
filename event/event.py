@@ -1,6 +1,6 @@
 """
 @file event.py
-@brief Event loop for 3lips.
+@brief Event loop for 3lips-contrail.
 @author 30hours
 """
 
@@ -12,7 +12,6 @@ import time
 import copy
 import json
 import hashlib
-import os
 import yaml
 from urllib.parse import unquote
 
@@ -28,6 +27,7 @@ from algorithm.tracker.JIPDATracker import JIPDATracker
 from common.Message import Message
 from data.Ellipsoid import Ellipsoid
 from algorithm.geometry.Geometry import Geometry
+from save_manager import SaveManager
 
 # init config file
 try:
@@ -42,7 +42,8 @@ try:
   tDeleteAdsb = config['associate']['adsb']['tDelete']
   save = config['3lips']['save']
   tDelete = config['3lips']['tDelete']
-  saveRetentionHours = config.get('3lips', {}).get('save_retention_hours', 24)
+  saveMaxBytes = config.get('3lips', {}).get('save_max_bytes', 100000000)
+  saveMaxTotalBytes = config.get('3lips', {}).get('save_max_total_bytes', 1000000000)
   tar1090Https = config['map']['tar1090_https']
   tar1090Server = config['map']['tar1090']
   eventInterval = config.get('event', {}).get('interval', 1.0)
@@ -78,7 +79,7 @@ adsbTruth = AdsbTruth(tDeleteAdsb, requestTimeout)
 geometricAssociator = GeometricAssociator(geometricConfig)
 ekf = EKFTracker(ekfConfig)
 jipda = JIPDATracker(ekf, jipdaConfig)
-saveFile = '/app/save/' + str(int(time.time())) + '.ndjson'
+saveManager = SaveManager('/app/save', saveMaxBytes, saveMaxTotalBytes)
 
 # ---- Radar config cache ----
 _radar_config_cache = {}          # {radar_name: config_dict or None}
@@ -211,7 +212,7 @@ async def event():
   timestamp = int(time.time()*1000)
   api_event = copy.copy(api)
 
-  # list all blah2 radars
+  # list all blah2-contrail radars
   radar_names = []
   for item in api_event:
     for radar in item["server"]:
@@ -383,8 +384,7 @@ async def event():
 
   # save to file
   if save:
-    append_api_to_file(api)
-    _cleanup_save_files('/app/save', saveRetentionHours)
+    saveManager.append(api)
 
 
 # event loop
@@ -419,35 +419,6 @@ async def main():
         await refresh_task
       except asyncio.CancelledError:
         pass
-
-def _cleanup_save_files(save_dir, retention_hours):
-  """Delete .ndjson files older than retention_hours from save_dir."""
-  if retention_hours <= 0:
-    return
-  try:
-    cutoff = time.time() - retention_hours * 3600
-    for fname in os.listdir(save_dir):
-      if not fname.endswith('.ndjson'):
-        continue
-      fpath = os.path.join(save_dir, fname)
-      try:
-        if os.path.getmtime(fpath) < cutoff:
-          os.remove(fpath)
-          print(f"Cleaned up old save file: {fname}")
-      except OSError:
-        pass
-  except OSError:
-    pass
-
-def append_api_to_file(api_object, filename=saveFile):
-
-  if not os.path.exists(filename):
-    with open(filename, 'w') as new_file:
-      pass
-
-  with open(filename, 'a') as json_file:
-    json.dump(api_object, json_file)
-    json_file.write('\n')
 
 def short_hash(input_string, length=10):
 

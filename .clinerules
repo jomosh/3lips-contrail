@@ -1,21 +1,21 @@
-# 3lips — Cline/DeepSeek Instructions
+# 3lips-contrail — Cline/DeepSeek Instructions
 
 > **Consolidated from:** `.github/copilot-instructions.md`, 3 agent definitions, 5 instruction files, 5 prompt templates, and project source analysis.
-> **Purpose:** Domain knowledge, code rules, and workflow templates for AI-assisted development of the 3lips passive radar localisation system.
+> **Purpose:** Domain knowledge, code rules, and workflow templates for AI-assisted development of the 3lips-contrail passive radar localisation system.
 > **TODO.md** is the single source of truth for development milestones — always reference it when planning work.
 
 ---
 
 ## 1. Project Identity
 
-3lips is a **real-time multi-static passive radar target localisation system**. It receives bistatic delay/Doppler detections from multiple [blah2](https://github.com/jomosh/blah2) radar nodes, associates them using geometric enumeration, localises target positions using geometric algorithms, and serves results through a JSON API and a MapLibre GL JS web frontend. ADS-B truth from a [tar1090](https://github.com/wiedehopf/tar1090) server is displayed as an overlay for reference.
+3lips-contrail is a **real-time multi-static passive radar target localisation system**. It receives bistatic delay/Doppler detections from multiple [blah2-contrail](https://github.com/jomosh/blah2-contrail) radar nodes, associates them using geometric enumeration, localises target positions using geometric algorithms, and serves results through a JSON API and a MapLibre GL JS web frontend. ADS-B truth from a [tar1090](https://github.com/wiedehopf/tar1090) server is displayed as an overlay for reference.
 
 This is a **signal-processing and sensor fusion project**, not a general web app. Every change must be evaluated for its effect on **localisation accuracy**, **processing latency**, and **algorithmic correctness**.
 
 ### Project Structure
 
 ```
-3lips/
+3lips-contrail/
 ├── api/                    # Flask API server + web frontend
 │   ├── api.py              # Main API routes and validation
 │   ├── map/                # MapLibre GL JS frontend
@@ -45,7 +45,7 @@ This is a **signal-processing and sensor fusion project**, not a general web app
 ### Architecture
 
 ```
-blah2 radar nodes (HTTP)          ADS-B truth (tar1090 HTTP)
+blah2-contrail radar nodes (HTTP)          ADS-B truth (tar1090 HTTP)
         │                                    │
         ▼                                    ▼
 event/event.py  ─── ZMQ (port 6969) ───  api/api.py (Flask)

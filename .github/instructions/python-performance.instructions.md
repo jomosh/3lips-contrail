@@ -1,5 +1,5 @@
 ---
-description: "Use when writing performance-sensitive Python code in the event loop or algorithm files. Covers NumPy vectorisation patterns, async HTTP, caching, and profiling conventions for 3lips."
+description: "Use when writing performance-sensitive Python code in the event loop or algorithm files. Covers NumPy vectorisation patterns, async HTTP, caching, and profiling conventions for 3lips-contrail."
 applyTo: "event/**/*.py"
 ---
 # Performance Rules for Event Loop Code

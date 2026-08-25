@@ -1,6 +1,6 @@
 """
 @file api.py
-@brief API for 3lips.
+@brief API for 3lips-contrail.
 @author 30hours
 """
 

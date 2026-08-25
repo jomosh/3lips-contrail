@@ -1,5 +1,5 @@
 ---
-description: "Use when writing or modifying tests for 3lips algorithms, geometry functions, or integration scenarios. Covers test location, naming, required coverage, and synthetic scenario patterns."
+description: "Use when writing or modifying tests for 3lips-contrail algorithms, geometry functions, or integration scenarios. Covers test location, naming, required coverage, and synthetic scenario patterns."
 applyTo: "test/**/*.py"
 ---
 # Testing Rules

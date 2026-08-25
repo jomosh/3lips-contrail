@@ -15,7 +15,7 @@ class EllipsoidParametric:
   @class EllipsoidParametric
   @brief A class for intersecting ellipsoids using a parametric approx.
   @details Uses associated detections from multiple radars.
-  @see blah2 at https://github.com/jomosh/blah2.
+  @see blah2-contrail at https://github.com/jomosh/blah2-contrail.
   """
 
   def __init__(self, method="mean", nSamples=100, threshold=500):
@@ -34,7 +34,7 @@ class EllipsoidParametric:
     """
     @brief Perform target localisation using the ellipsoid parametric method.
     @details Generate a (non arc-length) parametric ellipsoid for each node.
-    @param assoc_detections (dict): JSON of blah2 radar detections.
+    @param assoc_detections (dict): JSON of blah2-contrail radar detections.
     @param radar_data (dict): Radar config and detection data keyed by radar name.
     @return dict: Localised points keyed by target ID.
     """
