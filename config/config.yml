@@ -75,6 +75,10 @@ event:
 
 3lips:
   save: true
+  # ~5–10 KB per epoch (1 Hz) ≈ 430–860 MB/day, so 100 MB keeps individual
+  # files small enough to inspect/download while lasting a couple of hours.
   save_max_bytes: 100000000        # rotate to a new .ndjson file when the current file exceeds this (bytes; 0 = unlimited)
+  # 1 GB bounds the whole save/ directory to roughly a day of capture at
+  # default rates; 0 disables the cap.
   save_max_total_bytes: 1000000000 # delete oldest .ndjson files when save/ total exceeds this (bytes; 0 = unlimited)
   tDelete: 60                      # seconds of inactivity before removing an API session

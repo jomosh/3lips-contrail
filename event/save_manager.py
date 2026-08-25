@@ -119,7 +119,11 @@ class SaveManager:
       with open(self._active_file, 'a') as json_file:
         json.dump(api_object, json_file)
         json_file.write('\n')
-    except OSError as e:
+    except (OSError, TypeError, ValueError) as e:
+      # OSError covers I/O failures; TypeError/ValueError cover
+      # non-serialisable or circular api_object graphs.  Swallow rather
+      # than propagate to the caller, so a bad payload cannot crash the
+      # event loop.
       print(f"SaveManager: failed to write {self._active_file}: {e}")
       return
 
