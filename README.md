@@ -2,12 +2,19 @@
 
 Target localisation for multi-static radar using ellipse intersections. Not a dating app.
 
+## Project Components
+
+3lips-contrail is one part of a multi-component passive-radar project:
+
+- **[blah2-contrail](https://github.com/jomosh/blah2-contrail)** — the passive radar nodes that produce bistatic range (delay) and Doppler detections, which 3lips-contrail associates and localises.
+- **[adsb2dd-contrail](https://github.com/jomosh/adsb2dd-contrail)** — generates delay-Doppler data from ADS-B data so ADS-B targets can be plotted on the delay-Doppler map in blah2-contrail.
+
 
 ![3lips-contrail example display](./example.png "3lips-contrail")
 
 ## Features
 
-- Provides a JSON API for geolocation of targets given [blah2-contrail](http://github.com/jomosh/blah2-contrail) radar nodes.
+- Provides a JSON API for target geolocation.
 - Uses a [MapLibre GL JS](https://github.com/maplibre/maplibre-gl-js) web front-end to visualise data.
 - Ability to compare a number of algorithms for target localisation.
 
